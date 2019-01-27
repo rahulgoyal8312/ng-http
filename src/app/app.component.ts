@@ -2,6 +2,10 @@ import { Component } from '@angular/core';
 import { Response } from '@angular/http';
 
 import { ServerService } from './server.service';
+import { AppError } from './app-error';
+import { MethodNotAllowed } from './method-not-allowed';
+import { NotFoundError } from './not-found';
+import { AppErrorHandler } from './app-error-handler';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +27,7 @@ export class AppComponent {
     }
   ];
   constructor(private serverService: ServerService) {}
+
   onAddServer(name: string) {
     this.servers.push({
       name: name,
@@ -34,23 +39,38 @@ export class AppComponent {
     this.serverService.storeServers(this.servers)
       .subscribe(
         (response) => console.log(response),
-        (error) => console.log(error)
-      );
-  }
-  onGet() {
-    this.serverService.getServers()
-      .subscribe(
-        (servers: any[]) => this.servers = servers,
-        (error) => console.log(error)
+        (error: AppError) => {
+          if(error instanceof MethodNotAllowed){
+            alert('Something is wrong in this form/Data');
+          }
+          else throw error;
+        }
       );
   }
 
+  onGet() {
+    this.serverService.getServers()
+      .subscribe(
+        (servers: any) => this.servers = servers,
+        (error: AppError) => {
+          if(error instanceof NotFoundError){
+            alert('Data Not found!');
+          }
+          else throw error;
+        }
+    );
+  }
+
   onDelete(server){
-    console.log(server);
-    // this.serverService.deleteServer(server.id).subscribe(
-    //     (response: Response)=> console.log(response),
-    //     (error) => console.log(error)
-    //   );
+    this.serverService.deleteServer(123).subscribe(
+        (response: Response)=> console.log('Response',response),
+        (error: AppError) => {
+          if(error instanceof NotFoundError){
+            alert('Not found!');
+          }
+          else throw error;
+        }
+      );
   }
   private generateId() {
     return Math.round(Math.random() * 10000);

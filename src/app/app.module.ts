@@ -1,9 +1,13 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { ServerService } from './server.service';
 import { AppComponent } from './app.component';
+import { AppError } from './app-error';
+import { NotFoundError } from './not-found';
+import { AppErrorHandler } from './app-error-handler';
+import { ErrorHandler } from '@angular/core';
 
 @NgModule({
   declarations: [
@@ -12,9 +16,12 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpClientModule
   ],
-  providers: [ServerService],
+  providers: [
+    ServerService,
+    {provide: ErrorHandler, useClass: AppErrorHandler }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
